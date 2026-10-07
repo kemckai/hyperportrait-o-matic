@@ -20,3 +20,5 @@ Styles:
 - `mix` gives each variant a different artist, starting with Peter Max. Ask for 30 variants to get every artist once.
 - `flattering`: color grades, glow, light leaks, and backdrop color. Skin smoothing and feature sharpening are masked to the face, so features are never warped.
 - `glitch`: posterize, swirl, elastic warps, and band glitches applied across the face.
+
+To update the demo page after changing `web/`, run `scripts/publish_pages.sh`. It rebuilds `_site/` and force-pushes it to the `gh-pages` branch.
