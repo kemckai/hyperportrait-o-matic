@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Hyperportrait-o-Matic</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1a1230" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23e91e78'/%3E%3Ccircle cx='16' cy='17' r='6' fill='none' stroke='%23fff3b0' stroke-width='3'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://unpkg.com" crossorigin />
+  <link rel="stylesheet" href="static/styles.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&family=Shrikhand&display=swap" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&family=Shrikhand&display=swap" /></noscript>
+  <script type="importmap">
+    { "imports": { "three": "https://unpkg.com/three@0.169.0/build/three.module.min.js" } }
+  </script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">Hyperportrait-o-Matic</span>
+    </div>
+    <div class="tools" role="toolbar" aria-label="Canvas tools">
+      <button class="tool panel-toggle" id="toggle-left" title="Toggle layers panel ([)" aria-label="Toggle layers panel" aria-pressed="true">
+        <svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM9.5 5v14" /><path class="fill" d="M4 5h5.5v14H4z" /></svg>
+      </button>
+      <span class="divider"></span>
+      <button class="tool active" data-tool="move" title="Move (V)" aria-label="Move tool">
+        <svg viewBox="0 0 24 24"><path d="M5 3l14 8-6 1.5L10 19z" /></svg>
+      </button>
+      <button class="tool" data-tool="hand" title="Hand (H)" aria-label="Hand tool">
+        <svg viewBox="0 0 24 24"><path d="M8 11V5.5a1.5 1.5 0 013 0V10m0-5.5a1.5 1.5 0 013 0V10m0-4a1.5 1.5 0 013 0v7.5c0 4-2.5 6.5-6 6.5-2.6 0-4.2-1.3-5.6-3.4L4 13.2a1.5 1.5 0 012.5-1.6L8 13.5" /></svg>
+      </button>
+      <span class="divider"></span>
+      <button class="tool" id="upload-btn" title="Feed a face (U)" aria-label="Upload image">
+        <svg viewBox="0 0 24 24"><path d="M12 16V4m0 0l-4 4m4-4l4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" /></svg>
+      </button>
+    </div>
+    <div class="filename">
+      <span class="muted">Factory /</span> <span id="file-title">Untitled portrait</span>
+    </div>
+    <div class="top-actions">
+      <button class="bg-switch" id="bg-switch" role="switch" aria-checked="false" title="Show just the background (B)">
+        <span class="bg-track" aria-hidden="true"><span class="bg-knob"></span></span>
+        <span class="bg-label">Background</span>
+      </button>
+      <button class="zoom" id="zoom-btn" title="Zoom to fit (Shift+1)">100%</button>
+      <button class="run" id="run-btn" disabled>
+        <span class="lever" aria-hidden="true"></span>
+        <span class="run-label">Run the machine</span>
+        <kbd id="run-kbd">⌘↵</kbd>
+      </button>
+      <button class="tool panel-toggle" id="toggle-right" title="Toggle inspector (])" aria-label="Toggle inspector" aria-pressed="true">
+        <svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM14.5 5v14" /><path class="fill" d="M14.5 5H20v14h-5.5z" /></svg>
+      </button>
+    </div>
+  </header>
+
+  <aside class="panel left">
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-tab="layers" role="tab">Layers</button>
+      <button class="tab" data-tab="assets" role="tab">Assets</button>
+    </div>
+    <div class="tab-body" id="layers-tab">
+      <div class="layers" id="layers"></div>
+    </div>
+    <div class="tab-body hidden" id="assets-tab">
+      <div class="section-title">Artist styles</div>
+      <div class="asset-search">
+        <input class="field" id="asset-search" type="search" placeholder="Search artists" aria-label="Search artists" />
+      </div>
+      <div class="assets" id="assets"></div>
+    </div>
+  </aside>
+
+  <main class="viewport" id="viewport" tabindex="0" aria-label="Canvas">
+    <div class="cosmos"></div>
+    <canvas id="scene3d" aria-hidden="true"></canvas>
+    <div class="grid" id="grid"></div>
+    <div class="world" id="world"></div>
+    <div class="toast hidden" id="toast" role="status">
+      <span class="gumball" aria-hidden="true"></span>
+      <span id="toast-text">Warming up the rainbow boilers…</span>
+    </div>
+  </main>
+
+  <aside class="panel right" id="inspector"></aside>
+
+  <div class="lightbox hidden" id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged portrait">
+    <img id="lightbox-img" alt="" draggable="false" />
+    <div class="lightbox-bar" id="lightbox-bar">
+      <button class="lb-btn" id="lb-prev" title="Previous (←)" aria-label="Previous">
+        <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" /></svg>
+      </button>
+      <span class="lb-title" id="lb-title"></span>
+      <span class="lb-count muted" id="lb-count"></span>
+      <a class="btn primary" id="lb-download" download>Download</a>
+      <button class="lb-btn" id="lb-next" title="Next (→)" aria-label="Next">
+        <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" /></svg>
+      </button>
+      <button class="lb-btn" id="lb-close" title="Close (Esc)" aria-label="Close">
+        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>
+      </button>
+    </div>
+  </div>
+
+  <input type="file" id="file" accept="image/jpeg,image/png,image/webp" hidden />
+  <script type="module" src="static/app.js"></script>
+</body>
+</html>
